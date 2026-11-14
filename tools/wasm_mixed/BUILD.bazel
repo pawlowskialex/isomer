@@ -27,6 +27,7 @@ swift_binary(
         "Generate.swift",
         "MapSlots.swift",
         "PythonText.swift",
+        "Select.swift",
         "Slim.swift",
         "Wasm.swift",
         "main.swift",

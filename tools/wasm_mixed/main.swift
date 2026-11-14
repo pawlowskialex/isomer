@@ -18,11 +18,14 @@ let usage = """
           mixed_glue.c, mixed_glue.h and shim.wat for wasm2c's hot.h
       generate --wasm-split <path> --wasm2c <path> --wat2wasm <path>
                --runtime <runtime.wasm> --set <set.txt> --entries <keep> --out <dir>
-               [--wasi-run <wasi_run>]
+               [--max-size <bytes>] [--modules <A,B>] [--closure 1] [--wasi-run <wasi_run>]
           all of it: hot_0.c … hot_7.c, hot.h, hot-impl.h, mixed_glue.c,
           mixed_glue.h, shim.wasm and slots.txt in <dir>. The runtime must
           have its name section; <keep> is the entry points and the routed
-          functions.
+          functions. A set's name means every function by that name; with
+          --max-size, every function of at most that many bytes of code
+          goes native too; with --modules, every Swift function of those
+          modules; with --closure 1, everything those call directly.
 
     """
 
@@ -44,7 +47,7 @@ func generateOptions(_ args: ArraySlice<String>) -> Generate.Options {
     let fields: [String: WritableKeyPath<Generate.Options, String>] = [
         "--wasm-split": \.wasmSplit, "--wasm2c": \.wasm2c, "--wat2wasm": \.wat2wasm,
         "--runtime": \.runtime, "--set": \.set, "--entries": \.entries, "--out": \.out,
-        "--wasi-run": \.wasiRun,
+        "--wasi-run": \.wasiRun, "--max-size": \.maxSize, "--modules": \.modules, "--closure": \.closure,
     ]
     var seen: Set<String> = []
     var rest = args[...]
@@ -61,7 +64,7 @@ func generateOptions(_ args: ArraySlice<String>) -> Generate.Options {
         options[keyPath: field] = value
         seen.insert(flag)
     }
-    let missing = fields.keys.filter { !seen.contains($0) && $0 != "--wasi-run" }.sorted()
+    let missing = fields.keys.filter { !seen.contains($0) && $0 != "--wasi-run" && $0 != "--max-size" && $0 != "--modules" && $0 != "--closure" }.sorted()
     if !missing.isEmpty { fail("generate: missing \(missing.joined(separator: ", "))\n\n\(usage)") }
     return options
 }

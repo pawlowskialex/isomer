@@ -3,6 +3,7 @@ import Foundation
 // `generate`: the whole of a mixed build's native part, from the runtime
 // module and a native set to the files the host compiles:
 //
+//   0. the functions to make native (Select):   keep_funcs.txt
 //   1. slim the runtime to the entry points:      split_input.wasm
 //   2. Binaryen's wasm-split on the set:           hot_full.wasm, cold.wasm (+ .symbols)
 //   3. slim the native part:                       hot.wasm
@@ -24,6 +25,14 @@ enum Generate {
         var set = ""
         var entries = ""
         var out = ""
+        /// Every function of at most this many bytes of code goes native
+        /// too (Select.swift); 0, none by size.
+        var maxSize = "0"
+        /// Swift modules whose every function goes native (comma-separated).
+        var modules = ""
+        /// "1": what the chosen functions and the entry points call
+        /// directly goes native too, all the way down.
+        var closure = "0"
         /// When set, --wasm2c and --wat2wasm are WASI modules (WABT's WASI
         /// build) run by this command (//tools/wasm/wasi_run), the output
         /// directory their working directory: the same on every build
@@ -67,6 +76,13 @@ enum Generate {
         // the first part, so only the entry points (and the routed functions)
         // stay exported.
         let runtimeBytes = try FileIO.read(runtime)
+        guard let maxSize = Int(o.maxSize), maxSize >= 0 else { throw ToolError("--max-size: not a size: \(o.maxSize)") }
+        let setLines = PythonText.splitLines(String(decoding: try FileIO.read(set), as: UTF8.self))
+        let selection = try Select.run(runtime: runtimeBytes, set: setLines, maxSize: maxSize,
+                                       modules: o.modules.split(separator: ",").map(String.init),
+                                       closure: o.closure == "1", entries: keep)
+        try FileIO.write(work + "/keep_funcs.txt", selection.names.joined(separator: "\n") + "\n")
+        print("native: \(selection.names.count) functions, \(Slim.megabytes(selection.bytes)) MB of code: \(selection.fromSet) from the set, \(selection.bySize) more of at most \(maxSize) bytes, \(selection.byModule) more of the modules, \(selection.byClosure) more they call; \(selection.absent.count) of the set's names aren't in the runtime")
         let splitInput = try Slim.slim(runtimeBytes, keeping: keep)
         try FileIO.write(work + "/split_input.wasm", splitInput)
         print("split input: \(Slim.megabytes(runtimeBytes.count)) MB -> \(Slim.megabytes(splitInput.count)) MB")
@@ -74,7 +90,7 @@ enum Generate {
         // 2. The split: the set (and what is exported) in hot_full.wasm.
         let splitLog = try tool(
             wasmSplit,
-            ["--split", "--no-placeholders", "--symbolmap", "--keep-funcs=@" + set,
+            ["--split", "--no-placeholders", "--symbolmap", "--keep-funcs=@keep_funcs.txt",
              "-o1", "hot_full.wasm", "-o2", "cold.wasm", "split_input.wasm"],
             in: work, log: work + "/wasm-split.log")
         let lines = PythonText.splitLines(splitLog)

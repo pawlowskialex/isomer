@@ -1,0 +1,114 @@
+load("@isomer//tools/wasm:mixed.bzl", "wasm_mixed_native")
+load("@isomer//tools/wasm:side_modules.bzl", "wasm_runtime_module", "wasm_side_module")
+load("@rules_swift//swift:swift.bzl", "swift_test")
+
+# Does a native set chosen without a feature serve it? 2048 (a feature the
+# Storybook's profile never saw) plays one recorded game in mixed mode with:
+#   - storybook: the Storybook's native set (its 99 taps), 2048 held out;
+#   - game2048: that set grown on 2048's own play (2048 Lab's);
+#   - storybook_small: the Storybook's set and every function of at most
+#     128 bytes (wasm_mixed_native's max_size);
+#   - small: every function of at most 128 bytes, and no profile at all;
+#   - rules: every function of Isomer's own modules and every function of at
+#     most 128 bytes, with the Storybook's set;
+#   - rules_only: the same rules, and no profile at all;
+#   - rules_runtime: rules_only and every function that isn't Swift's (the Swift
+#     runtime, the C library), no profile;
+#   - closure: Isomer's modules (with HotBridge) and everything they and the
+#     entry points call directly, all the way down; no profile;
+#   - closure_set: the same, with the Storybook's set;
+#   - interpreted: no native code (the side module under WasmKit).
+# The routed list is the Storybook's in both mixed runs, so only the set
+# differs. HeldOutBench.swift prints event-to-frame latency; with
+# --test_env=ISO_MIXED_COUNT=1 also native code's calls into the
+# interpreter (into the runtime's functions: what the set lacks).
+#
+#   bazel test -c opt --test_output=streamed //tools/wasm_bench/heldout:all
+
+wasm_runtime_module(
+    name = "heldout_runtime",
+    exports_for = [":game2048_side"],
+    tags = ["manual"],
+    deps = [
+        "//shared/platform_services",
+        "@isomer//wasm/libraries/swift_ui",
+        "@isomer//wasm/libraries/swift_ui:hot_bridge",
+        "@isomer//wasm/libraries/swift_ui:isomer",
+    ],
+)
+
+wasm_side_module(
+    name = "game2048_side",
+    tags = ["manual"],
+    deps = ["//wasm/game2048_feature:game2048_lib"],
+)
+
+ISOMER_MODULES = [
+    "SwiftUI",
+    "Observation",
+    "IsomerSwiftUI",
+    "IsomerFFI",
+    "Isomer",
+    "CoreGraphics",
+    "IsomerTreeMessages",
+]
+
+# The rules' variants: (name, set, max_size, modules, closure).
+VARIANTS = [
+    ("storybook", "storybook_native_set.txt", 0, [], False),
+    ("game2048", "game2048_native_set.txt", 0, [], False),
+    ("storybook_small", "storybook_native_set.txt", 128, [], False),
+    ("small", "no_profile_set.txt", 128, [], False),
+    ("rules", "storybook_native_set.txt", 128, ISOMER_MODULES, False),
+    ("rules_only", "no_profile_set.txt", 128, ISOMER_MODULES, False),
+    ("rules_runtime", "no_profile_set.txt", 128, ISOMER_MODULES + ["C"], False),
+    ("closure", "no_profile_set.txt", 0, ISOMER_MODULES + ["HotBridge"], True),
+    ("closure_set", "storybook_native_set.txt", 0, ISOMER_MODULES + ["HotBridge"], True),
+]
+
+[wasm_mixed_native(
+    name = "native_" + set_name,
+    closure = closure,
+    max_size = max_size,
+    modules = modules,
+    native_set = set_file,
+    routed = "storybook_routed.txt",
+    runtime = ":heldout_runtime.wasm",
+    tags = ["manual"],
+) for set_name, set_file, max_size, modules, closure in VARIANTS]
+
+[swift_test(
+    name = "bench_" + variant,
+    size = "large",
+    srcs = ["HeldOutBench.swift"],
+    data = [
+        "storybook_routed.txt",
+        ":game2048_side",
+        ":heldout_runtime.wasm",
+        ":native_%s_shim" % set_name,
+        ":native_%s_slots" % set_name,
+    ],
+    env = {
+        "HELDOUT_SET": set_name,
+        "HELDOUT_MODE": "interpreted" if variant == "interpreted" else "mixed",
+    },
+    tags = ["manual"],
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = [
+        ":native_" + set_name,
+        "@isomer//shared/wasm_host:mixed_runtime",
+        "@isomer//shared/wasm_host:wasm_runtime",
+        "@isomer//shared/wasm_host:wasmkit_runtime",
+    ],
+) for variant, set_name in [
+    ("storybook", "storybook"),
+    ("game2048", "game2048"),
+    ("storybook_small", "storybook_small"),
+    ("small", "small"),
+    ("rules", "rules"),
+    ("rules_only", "rules_only"),
+    ("rules_runtime", "rules_runtime"),
+    ("closure", "closure"),
+    ("closure_set", "closure_set"),
+    ("interpreted", "storybook"),
+]]

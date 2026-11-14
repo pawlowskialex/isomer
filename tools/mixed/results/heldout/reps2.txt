@@ -1,0 +1,85 @@
+1 rules_runtime [heldout] mixed, rules_runtime set
+1 rules_runtime [heldout] launch to first frame: 370 ms; played in 38.3 s
+1 rules_runtime [heldout] drag changed → frame: n 1217, mean 4.039 ms, median 0.609, p90 11.862, p99 23.351, max 30.151, total 4916 ms
+1 rules_runtime [heldout] release → frame: n 60, mean 11.501 ms, median 11.786, p90 14.178, p99 15.026, max 15.026, total 690 ms
+1 rules_runtime [heldout] animation frames: n 1024, mean 9.307 ms, median 9.337, p90 11.503, p99 12.995, max 14.152, total 9530 ms
+1 rules_runtime [heldout] busy: 15136 ms
+1 rules_runtime [heldout] last frame: 887 bytes, hash b88c7f171be37af8
+1 rules [heldout] mixed, rules set
+1 rules [heldout] launch to first frame: 303 ms; played in 38.3 s
+1 rules [heldout] drag changed → frame: n 1217, mean 0.691 ms, median 0.231, p90 1.633, p99 4.132, max 13.047, total 840 ms
+1 rules [heldout] release → frame: n 60, mean 2.215 ms, median 1.589, p90 4.678, p99 7.375, max 7.375, total 133 ms
+1 rules [heldout] animation frames: n 1200, mean 1.436 ms, median 1.230, p90 2.354, p99 3.702, max 6.603, total 1723 ms
+1 rules [heldout] busy: 2696 ms
+1 rules [heldout] last frame: 887 bytes, hash b88c7f171be37af8
+1 game2048 [heldout] mixed, game2048 set
+1 game2048 [heldout] launch to first frame: 181 ms; played in 38.3 s
+1 game2048 [heldout] drag changed → frame: n 1217, mean 1.474 ms, median 0.804, p90 3.277, p99 8.301, max 14.370, total 1794 ms
+1 game2048 [heldout] release → frame: n 60, mean 4.108 ms, median 3.440, p90 7.770, p99 9.146, max 9.146, total 246 ms
+1 game2048 [heldout] animation frames: n 1200, mean 2.346 ms, median 2.382, p90 3.255, p99 4.370, max 7.417, total 2815 ms
+1 game2048 [heldout] busy: 4856 ms
+1 game2048 [heldout] last frame: 887 bytes, hash b88c7f171be37af8
+1 storybook [heldout] mixed, storybook set
+1 storybook [heldout] launch to first frame: 183 ms; played in 38.3 s
+1 storybook [heldout] drag changed → frame: n 1217, mean 1.071 ms, median 0.420, p90 2.465, p99 4.380, max 17.421, total 1303 ms
+1 storybook [heldout] release → frame: n 60, mean 3.334 ms, median 2.636, p90 5.264, p99 28.909, max 28.909, total 200 ms
+1 storybook [heldout] animation frames: n 1198, mean 2.508 ms, median 2.517, p90 3.064, p99 3.909, max 4.782, total 3004 ms
+1 storybook [heldout] busy: 4507 ms
+1 storybook [heldout] last frame: 887 bytes, hash b88c7f171be37af8
+2 rules_runtime [heldout] mixed, rules_runtime set
+2 rules_runtime [heldout] launch to first frame: 365 ms; played in 38.3 s
+2 rules_runtime [heldout] drag changed → frame: n 1217, mean 3.471 ms, median 0.566, p90 10.520, p99 14.470, max 32.233, total 4225 ms
+2 rules_runtime [heldout] release → frame: n 60, mean 10.306 ms, median 9.988, p90 14.177, p99 16.383, max 16.383, total 618 ms
+2 rules_runtime [heldout] animation frames: n 1016, mean 9.490 ms, median 9.413, p90 11.726, p99 13.861, max 33.524, total 9642 ms
+2 rules_runtime [heldout] busy: 14485 ms
+2 rules_runtime [heldout] last frame: 887 bytes, hash b88c7f171be37af8
+2 rules [heldout] mixed, rules set
+2 rules [heldout] launch to first frame: 283 ms; played in 38.3 s
+2 rules [heldout] drag changed → frame: n 1217, mean 0.477 ms, median 0.164, p90 1.247, p99 1.715, max 4.343, total 580 ms
+2 rules [heldout] release → frame: n 60, mean 1.437 ms, median 1.360, p90 1.746, p99 3.567, max 3.567, total 86 ms
+2 rules [heldout] animation frames: n 1199, mean 1.131 ms, median 1.090, p90 1.419, p99 1.973, max 10.186, total 1356 ms
+2 rules [heldout] busy: 2022 ms
+2 rules [heldout] last frame: 887 bytes, hash b88c7f171be37af8
+2 game2048 [heldout] mixed, game2048 set
+2 game2048 [heldout] launch to first frame: 170 ms; played in 38.3 s
+2 game2048 [heldout] drag changed → frame: n 1217, mean 1.543 ms, median 0.768, p90 3.625, p99 7.849, max 13.944, total 1878 ms
+2 game2048 [heldout] release → frame: n 60, mean 4.514 ms, median 4.252, p90 8.240, p99 11.518, max 11.518, total 271 ms
+2 game2048 [heldout] animation frames: n 1199, mean 2.466 ms, median 2.589, p90 3.552, p99 4.666, max 5.742, total 2957 ms
+2 game2048 [heldout] busy: 5106 ms
+2 game2048 [heldout] last frame: 887 bytes, hash b88c7f171be37af8
+2 storybook [heldout] mixed, storybook set
+2 storybook [heldout] launch to first frame: 180 ms; played in 38.3 s
+2 storybook [heldout] drag changed → frame: n 1217, mean 1.843 ms, median 0.772, p90 4.565, p99 8.955, max 11.746, total 2243 ms
+2 storybook [heldout] release → frame: n 60, mean 6.201 ms, median 6.460, p90 9.215, p99 14.052, max 14.052, total 372 ms
+2 storybook [heldout] animation frames: n 1201, mean 3.488 ms, median 3.368, p90 4.660, p99 6.252, max 22.113, total 4189 ms
+2 storybook [heldout] busy: 6804 ms
+2 storybook [heldout] last frame: 887 bytes, hash b88c7f171be37af8
+3 rules_runtime [heldout] mixed, rules_runtime set
+3 rules_runtime [heldout] launch to first frame: 361 ms; played in 38.3 s
+3 rules_runtime [heldout] drag changed → frame: n 1217, mean 4.154 ms, median 0.647, p90 12.424, p99 22.209, max 28.668, total 5055 ms
+3 rules_runtime [heldout] release → frame: n 60, mean 11.918 ms, median 11.901, p90 14.482, p99 18.369, max 18.369, total 715 ms
+3 rules_runtime [heldout] animation frames: n 1009, mean 9.480 ms, median 9.527, p90 11.775, p99 13.626, max 25.145, total 9565 ms
+3 rules_runtime [heldout] busy: 15336 ms
+3 rules_runtime [heldout] last frame: 887 bytes, hash b88c7f171be37af8
+3 rules [heldout] mixed, rules set
+3 rules [heldout] launch to first frame: 275 ms; played in 38.3 s
+3 rules [heldout] drag changed → frame: n 1217, mean 1.550 ms, median 0.741, p90 3.658, p99 9.335, max 14.911, total 1886 ms
+3 rules [heldout] release → frame: n 60, mean 4.468 ms, median 3.982, p90 7.155, p99 12.287, max 12.287, total 268 ms
+3 rules [heldout] animation frames: n 1199, mean 2.491 ms, median 2.369, p90 3.587, p99 5.988, max 14.325, total 2986 ms
+3 rules [heldout] busy: 5140 ms
+3 rules [heldout] last frame: 887 bytes, hash b88c7f171be37af8
+3 game2048 [heldout] mixed, game2048 set
+3 game2048 [heldout] launch to first frame: 166 ms; played in 38.3 s
+3 game2048 [heldout] drag changed → frame: n 1217, mean 1.384 ms, median 0.954, p90 3.038, p99 7.125, max 12.488, total 1684 ms
+3 game2048 [heldout] release → frame: n 60, mean 3.639 ms, median 2.652, p90 6.588, p99 10.081, max 10.081, total 218 ms
+3 game2048 [heldout] animation frames: n 1198, mean 2.331 ms, median 2.017, p90 3.673, p99 5.758, max 15.133, total 2792 ms
+3 game2048 [heldout] busy: 4695 ms
+3 game2048 [heldout] last frame: 887 bytes, hash b88c7f171be37af8
+3 storybook [heldout] mixed, storybook set
+3 storybook [heldout] launch to first frame: 222 ms; played in 38.3 s
+3 storybook [heldout] drag changed → frame: n 1217, mean 1.339 ms, median 0.519, p90 3.194, p99 6.746, max 12.478, total 1630 ms
+3 storybook [heldout] release → frame: n 60, mean 3.884 ms, median 3.313, p90 6.455, p99 15.080, max 15.080, total 233 ms
+3 storybook [heldout] animation frames: n 1201, mean 2.935 ms, median 2.837, p90 3.788, p99 5.086, max 9.717, total 3525 ms
+3 storybook [heldout] busy: 5389 ms
+3 storybook [heldout] last frame: 887 bytes, hash b88c7f171be37af8
+done
