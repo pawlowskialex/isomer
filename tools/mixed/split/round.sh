@@ -30,7 +30,9 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 HOST=$(cd "$HERE/../host" && pwd)
 WORK=${WORK:-/tmp/isomer-mixed}
 ROUTED=${ROUTED:-}
-ENTRIES=memory,__indirect_function_table,__stack_pointer,iso_hot_start,iso_hot_render,iso_hot_render_pending,iso_hot_event,iso_hot_resize,iso_hot_alloc,iso_hot_free,iso_hot_shutdown,iso_hot_pending_tasks,iso_hot_configure,iso_hot_set_color_scheme
+# swift_ffi_task_run and swift_ffi_async_resume run the guest's Swift jobs (a
+# view's Task, a timer): entry points too, or every job runs interpreted.
+ENTRIES=memory,__indirect_function_table,__stack_pointer,iso_hot_start,iso_hot_render,iso_hot_render_pending,iso_hot_event,iso_hot_resize,iso_hot_alloc,iso_hot_free,iso_hot_shutdown,iso_hot_pending_tasks,iso_hot_configure,iso_hot_set_color_scheme,swift_ffi_task_run,swift_ffi_async_resume
 KEEP=$ENTRIES${ROUTED:+,@$ROUTED}
 
 R=$WORK/round

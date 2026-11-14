@@ -6,13 +6,25 @@
 import Foundation
 @_spi(OnlyForCLI) import WasmKit
 
+//
+// The iPhone app's copy adds one thing: `DragBench.long`, set by
+// LimitsBench.swift, replaces the run with its long paced one.
 enum DragBench {
+    typealias Run = (
+        _ call: (String, [Value]) throws -> [Value],
+        _ write: (UInt32, [UInt8]) -> Void,
+        _ stream: () -> [UInt8], _ clearStream: () -> Void,
+        _ takeWantsRender: () -> Bool
+    ) throws -> String
+    nonisolated(unsafe) static var long: Run?
+
     static func run(
         call: (String, [Value]) throws -> [Value],
         write: (UInt32, [UInt8]) -> Void,
         stream: () -> [UInt8], clearStream: () -> Void,
         takeWantsRender: () -> Bool
     ) throws -> String {
+        if let long { return try long(call, write, stream, clearStream, takeWantsRender) }
         let t0 = Date()
         _ = try call("iso_hot_start", [.f64(390.0.bitPattern), .f64(680.0.bitPattern)])
         _ = try call("iso_hot_render", [])

@@ -1,0 +1,87 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>2048 drag benchmark</title>
+<pre id="out">loading…</pre>
+<script type="module">
+// Served by WebViewBench.swift's scheme handler (bench://app/), with
+// cross-origin isolation so performance.now() is fine-grained.
+import { load, dragBench, firstID } from './drag_bench.js';
+const fetchBytes = async (name) => new Uint8Array(await (await fetch(name)).arrayBuffer());
+const files = {};
+let app = null, dragID = null;
+window.bench = {
+  info: () => ({ crossOriginIsolated: self.crossOriginIsolated, userAgent: navigator.userAgent }),
+  // Reads the modules once.
+  fetch: async (names) => { for (const n of names) files[n] ??= await fetchBytes(n); return names.map(n => files[n].length); },
+  // The whole benchmark in the page: the engine alone.
+  inPage: (main, sides) => {
+    const t = performance.now();
+    const a = load({ main: files[main], sides: sides.map(s => files[s]) });
+    const loadMs = performance.now() - t;
+    return { loadMs, ...dragBench(a, () => performance.now()) };
+  },
+  // The host-driven mode: the native side sends each event and gets the
+  // frame back, as a web-view engine would.
+  open: (main, sides) => {
+    const t = performance.now();
+    app = load({ main: files[main], sides: sides.map(s => files[s]) });
+    const loadMs = performance.now() - t;
+    app.start(390, 680);
+    dragID = firstID(app.frameBytes(), '.drag');
+    return { loadMs, firstMs: performance.now() - t - loadMs, frame: app.frameBytes().length, dragID };
+  },
+  // One event and its render; the frame back as base64, and the engine's own time.
+  event: (value) => {
+    const t = performance.now();
+    app.stream.length = 0; app.wantsRender = false;
+    app.send(dragID, value); app.render();
+    const engineMs = performance.now() - t;
+    const bytes = app.frameBytes();
+    let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return { engineMs, frame: btoa(s), wantsRender: app.wantsRender };
+  },
+  frame: () => {
+    app.stream.length = 0; app.wantsRender = false; app.render();
+    const bytes = app.frameBytes();
+    let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return { frame: btoa(s), wantsRender: app.wantsRender };
+  },
+};
+// (module (import "env" "f" (func $f (param i32) (result i32)))
+//   (func (export "run") (param $n i32) (result i32) (local $acc i32)
+//     (loop (local.set $acc (call $f (local.get $acc)))
+//       (br_if 0 (local.tee $n (i32.sub (local.get $n) (i32.const 1)))))
+//     (local.get $acc)))
+// The same bytes as the WasmKit side's (LimitsBench.swift).
+const LOOP = new Uint8Array([
+  0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00,
+  0x01, 0x06, 0x01, 0x60, 0x01, 0x7f, 0x01, 0x7f,
+  0x02, 0x09, 0x01, 0x03, 0x65, 0x6e, 0x76, 0x01, 0x66, 0x00, 0x00,
+  0x03, 0x02, 0x01, 0x00,
+  0x07, 0x07, 0x01, 0x03, 0x72, 0x75, 0x6e, 0x00, 0x01,
+  0x0a, 0x1a, 0x01, 0x18, 0x01, 0x01, 0x7f,
+  0x03, 0x40, 0x20, 0x01, 0x10, 0x00, 0x21, 0x01, 0x20, 0x00, 0x41, 0x01, 0x6b, 0x22, 0x00, 0x0d, 0x00, 0x0b,
+  0x20, 0x01, 0x0b,
+]);
+// A guest's synchronous call into the app, `n` times from the wasm loop.
+window.bench.calls = (kind, n) => {
+  let f;
+  if (kind === 'js') f = (x) => x + 1;
+  else if (kind === 'xhr') f = (x) => { const r = new XMLHttpRequest(); r.open('GET', 'bench://app/sync', false); r.send(); return x + (r.responseText === '1' ? 1 : 0); };
+  else if (kind === 'prompt') f = (x) => x + Number(prompt('sync'));
+  const inst = new WebAssembly.Instance(new WebAssembly.Module(LOOP), { env: { f } });
+  const t = performance.now();
+  const result = inst.exports.run(n);
+  const ms = performance.now() - t;
+  return { ms, perCallUs: ms * 1000 / n, result };
+};
+// The asynchronous way, for reference: a message the app replies to.
+window.bench.asyncCalls = async (n) => {
+  const t = performance.now();
+  for (let i = 0; i < n; i++) await window.webkit.messageHandlers.reply.postMessage(i);
+  const ms = performance.now() - t;
+  return { ms, perCallUs: ms * 1000 / n };
+};
+document.getElementById('out').textContent = 'ready';
+window.webkit?.messageHandlers?.ready?.postMessage('ready');
+</script>

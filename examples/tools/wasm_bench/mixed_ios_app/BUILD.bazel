@@ -6,7 +6,10 @@ load("@rules_swift//swift:swift.bzl", "swift_interop_hint", "swift_library")
 load("@isomer_signing//:signing.bzl", "TEAM_ID")
 
 # The 2048 drag benchmark on an iPhone (BenchApp.swift; docs/side_modules.md
-# has its results). chot/ (the runtime's native copies and the bridge, which
+# has its results), and with `-limits <engine>` what each engine costs beyond
+# its speed (LimitsBench.swift; WebViewBench.swift is tools/mixed/webview's,
+# a link). By default it is 2048 Lab: the game to play, mixed or in a web
+# view (PlayEngines.swift). chot/ (the runtime's native copies and the bridge, which
 # tools/mixed/split/round.sh generates) and resources/ (the modules it runs)
 # are filled by prepare.sh, not checked in. Everything is `manual` and
 # dev-only (a device build needs a team's provisioning profile: pass
@@ -43,12 +46,17 @@ swift_library(
         "BenchApp.swift",
         "DragBench.swift",
         "InterpretedBench.swift",
+        "LimitsBench.swift",
         "MixedBench.swift",
+        "PlayEngines.swift",
+        "PlayMixedThread.swift",
+        "WebViewBench.swift",
     ],
     copts = ["-swift-version", "5"],
     tags = ["manual"],
     deps = [
         ":chot",
+        "@isomer//apple/libraries/wasm_view",
         "@isomer//shared/wasm_host:wasmkit_runtime",
     ],
 )

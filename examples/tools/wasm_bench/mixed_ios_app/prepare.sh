@@ -28,5 +28,9 @@ cp "$5" "$HERE/resources/game2048_side.wasm"
 cp "$ROUND/c/shim.wasm" "$HERE/resources/shim.wasm"
 cp "$ROUND/slots.txt" "$HERE/resources/slots.txt"
 cp "$6" "$HERE/resources/routed.txt"
+# The web view's page and script (LimitsBench.swift's `-limits webview`).
+cp "$HERE/../../../../tools/mixed/webview/page.html" "$HERE/../../../../tools/mixed/webview/drag_bench.js" "$HERE/resources/"
+# The game's page (PlayEngines.swift's web view engine).
+cp "$HERE/../../../../tools/mixed/webview/game.html" "$HERE/../../../../tools/mixed/webview/game.js" "$HERE/resources/"
 chmod -R u+w "$HERE/chot" "$HERE/resources"
 echo "chot/ and resources/ filled"

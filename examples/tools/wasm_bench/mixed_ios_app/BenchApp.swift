@@ -11,7 +11,17 @@ import UIKit
 @main
 struct MixedBenchApp: App {
     var body: some Scene {
-        WindowGroup { BenchView() }
+        // The game to play by default (PlayEngines.swift); `-bench` the drag
+        // benchmark below; `-limits <engine>` LimitsBench.swift's runs.
+        WindowGroup {
+            if limitsMode != nil {
+                LimitsView()
+            } else if ProcessInfo.processInfo.arguments.contains("-bench") {
+                BenchView()
+            } else {
+                PlayChooser()
+            }
+        }
     }
 }
 

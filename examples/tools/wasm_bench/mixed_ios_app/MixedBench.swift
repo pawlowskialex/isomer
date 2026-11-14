@@ -260,8 +260,26 @@ nonisolated(unsafe) var wantsRender = false
 nonisolated(unsafe) var linkerForLate: WasmDynamicLinker?
 
 /// The host imports the runtime (and the shim, for the native copies) uses.
+/// The game's engine (PlayEngines.swift's MixedEngine) while one runs: the
+/// imports go to it instead of the benchmarks' stream and stubs.
+protocol MixedLiveHost: AnyObject {
+    func renderTree(_ bytes: [UInt8])
+    func scheduleRender()
+    func log(_ message: String)
+    func platformCommand(_ key: String, _ value: String)
+    func hostValue(_ key: String) -> String?
+    func taskEnqueue(_ job: UInt32)
+    func taskEnqueueAfter(_ job: UInt32, milliseconds: Int32)
+}
+nonisolated(unsafe) var liveHost: MixedLiveHost?
+
 func hostImports(for module: Module, into imports: inout Imports, store: Store) {
     func memory(_ caller: borrowing Caller) -> Memory { caller.instance!.exports[memory: "memory"]! }
+    func read(_ caller: borrowing Caller, _ pointer: Value, _ length: Value) -> [UInt8] {
+        let count = Int(length.i32)
+        guard count > 0 else { return [] }
+        return memory(caller).withUnsafeBufferPointer(offset: UInt(pointer.i32), count: count) { Array($0) }
+    }
     for item in module.imports {
         guard case .function(let index) = item.descriptor, let type = module.functionType(at: index) else { continue }
         switch (item.module, item.name) {
@@ -269,7 +287,11 @@ func hostImports(for module: Module, into imports: inout Imports, store: Store) 
             continue
         case ("iso_hot", "render_tree"):
             imports.define(module: item.module, name: item.name, Function(store: store, type: type) { caller, args in
-                memory(caller).withUnsafeBufferPointer(offset: UInt(args[0].i32), count: Int(args[1].i32)) { stream += $0 }
+                if let live = liveHost {
+                    live.renderTree(read(caller, args[0], args[1]))
+                } else {
+                    memory(caller).withUnsafeBufferPointer(offset: UInt(args[0].i32), count: Int(args[1].i32)) { stream += $0 }
+                }
                 return []
             })
         case ("env", let name):
@@ -280,12 +302,36 @@ func hostImports(for module: Module, into imports: inout Imports, store: Store) 
                 return try f.invoke(args)
             })
         default:
-            imports.define(module: item.module, name: item.name, Function(store: store, type: type) { _, _ in
-                if item.name == "schedule_render" { wantsRender = true }
-                if item.name == "epoch_millis" { return [.f64((Date().timeIntervalSince1970 * 1000).bitPattern)] }
+            let name = item.name
+            imports.define(module: item.module, name: item.name, Function(store: store, type: type) { caller, args in
+                if let live = liveHost {
+                    switch name {
+                    case "schedule_render": live.scheduleRender(); return []
+                    case "log": live.log(String(decoding: read(caller, args[0], args[1]), as: UTF8.self)); return []
+                    case "platform_command":
+                        live.platformCommand(String(decoding: read(caller, args[0], args[1]), as: UTF8.self),
+                                             String(decoding: read(caller, args[2], args[3]), as: UTF8.self))
+                        return []
+                    case "host_value":
+                        let key = String(decoding: read(caller, args[0], args[1]), as: UTF8.self)
+                        guard let answer = live.hostValue(key) else { return [.i32(UInt32(bitPattern: -1))] }
+                        let bytes = Array(answer.utf8)
+                        if bytes.count <= Int(args[3].i32) {
+                            memory(caller).withUnsafeMutableBufferPointer(offset: UInt(args[2].i32), count: bytes.count) { d in
+                                bytes.withUnsafeBytes { d.copyMemory(from: $0) }
+                            }
+                        }
+                        return [.i32(UInt32(bytes.count))]
+                    case "task_enqueue": live.taskEnqueue(args[0].i32); return []
+                    case "task_enqueue_after": live.taskEnqueueAfter(args[0].i32, milliseconds: Int32(bitPattern: args[1].i32)); return []
+                    default: break
+                    }
+                }
+                if name == "schedule_render" { wantsRender = true }
+                if name == "epoch_millis" { return [.f64((Date().timeIntervalSince1970 * 1000).bitPattern)] }
                 return type.results.map { t -> Value in
                     switch t {
-                    case .i32: return item.name == "host_value" ? .i32(UInt32(bitPattern: -1)) : .i32(0)
+                    case .i32: return name == "host_value" ? .i32(UInt32(bitPattern: -1)) : .i32(0)
                     case .i64: return .i64(0)
                     case .f32: return .f32(0)
                     default: return .f64(0)
@@ -296,9 +342,10 @@ func hostImports(for module: Module, into imports: inout Imports, store: Store) 
     }
 }
 
-/// Runs the drag benchmark in mixed mode; the runtime, shim, slot map and
-/// side modules from the app's bundle. Returns the report's lines.
-func runMixedBench(runtime runtimeBytes: [UInt8], shim shimBytes: [UInt8], slots: String, sides: [[UInt8]], routed: Set<String>) throws -> [String] {
+/// The runtime interpreted, its native copies attached, the side modules
+/// loaded: the bridge, the interpreted runtime and its WASI (to close when
+/// done), and what it noted.
+func setUpMixed(runtime runtimeBytes: [UInt8], shim shimBytes: [UInt8], slots: String, sides: [[UInt8]], routed: Set<String>) throws -> (bridge: Bridge, runtime: Instance, wasi: WASIBridgeToHost, log: [String]) {
     var log: [String] = []
     stream = []
     MixedLinkMain.routed = routed
@@ -306,8 +353,6 @@ func runMixedBench(runtime runtimeBytes: [UInt8], shim shimBytes: [UInt8], slots
     let b = Bridge()
     bridge = b
     let wasi = try WASIBridgeToHost(args: ["app"])
-    // WasmKit requires a bridge closed before it goes.
-    defer { try? wasi.close() }
 
     let runtimeModule = try parseWasm(bytes: runtimeBytes)
     var runtimeImports = Imports()
@@ -350,6 +395,18 @@ func runMixedBench(runtime runtimeBytes: [UInt8], shim shimBytes: [UInt8], slots
     b.linker = WasmDynamicLinker(main: MixedLinkMain(try WasmInstanceLinkMain(runtime)), store: b.store)
     linkerForLate = b.linker
     for side in sides { try b.linker.load(side) }
+    return (b, runtime, wasi, log)
+}
+
+/// Runs the drag benchmark in mixed mode; the runtime, shim, slot map and
+/// side modules from the app's bundle. Returns the report's lines.
+func runMixedBench(runtime runtimeBytes: [UInt8], shim shimBytes: [UInt8], slots: String, sides: [[UInt8]], routed: Set<String>) throws -> [String] {
+    stream = []
+    let started = Date()
+    let (b, runtime, wasi, setUpLog) = try setUpMixed(runtime: runtimeBytes, shim: shimBytes, slots: slots, sides: sides, routed: routed)
+    // WasmKit requires a bridge closed before it goes.
+    defer { try? wasi.close() }
+    var log = setUpLog
     log.append(String(format: "ready in %.0f ms", Date().timeIntervalSince(started) * 1000))
     log.append(try DragBench.run(
         call: { name, args in b.call(name, args, interpreted: runtime) },
