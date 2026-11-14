@@ -251,7 +251,7 @@ final class HeldOutBench: XCTestCase {
                 }
             }
             onFrame(stream)
-            let seconds = Double(environment["HELDOUT_SECONDS"] ?? "") ?? 205
+            let seconds = Double(environment["HELDOUT_SECONDS"] ?? "") ?? 225
             var n = 0, next = 0
             var dragging: (id: String, step: Int)?
             var byKind: [String: Int] = [:]

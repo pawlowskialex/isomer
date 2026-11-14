@@ -82,3 +82,10 @@ Round 3's corpus (80 screens of 8 items) met every piece and modifier, but
 only 226 of the 473 piece × container pairs, 965 of 1,290 piece × modifier
 and 80 of 88 container × pattern: the catalog had outgrown the screens'
 arithmetic (fixed after these measurements).
+
+Round 4 (reps7.txt, profile_corpus4.txt): the screens' arithmetic fixed,
+88 screens of 8 items meet every piece × container (473), piece × modifier
+(1,290) and container × pattern (88) pair. 4,949 runtime functions ran
+(round 3: 4,896). Busy time, median of 3: 2048 7.0 s with the corpus set,
+6.7 s with the rules; the Storybook 5.1 s and 4.4 s. The same as round 3
+within the runs' spread: these two apps were already covered.

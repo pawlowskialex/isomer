@@ -29,7 +29,7 @@ load("@rules_swift//swift:swift.bzl", "swift_library", "swift_test")
 #
 #   bazel test -c opt --test_output=streamed //tools/wasm_bench/heldout:all
 
-# The corpus (tools/wasm_mixed_corpus): an app of 80 screens made
+# The corpus (tools/wasm_mixed_corpus): an app of 88 screens made
 # methodically from SwiftUI's pieces, to profile the runtime with instead of
 # any one app.
 genrule(
