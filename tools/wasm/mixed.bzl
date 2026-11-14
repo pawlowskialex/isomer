@@ -142,8 +142,9 @@ def wasm_mixed_native(name, runtime, native_set, routed = None, max_size = 0, mo
             leaves what's beneath it interpreted).
         bounds_checks: Compile memory bounds checks into the native code. Off,
             it relies on WasmKit's guard pages (faster, 3.9 MB against 7.4 MB
-            of native code for the Storybook's runtime), and
-            MixedWasmKitRuntime refuses to launch where WasmKit has none.
+            of native code for the Storybook's runtime); where WasmKit has
+            none (a refused reservation), MixedWasmKitRuntime runs the guest
+            interpreted.
         tags: Tags for every target.
         visibility: The cc_library's and files' visibility.
     """

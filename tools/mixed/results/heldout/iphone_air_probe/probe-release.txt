@@ -1,0 +1,4 @@
+phase release, Version 27.2.1 (Build 24B156), 11734 MB
+reservations taken: 1, then released
+mixed launched: native code on
+drag events: 200, mean 1.19 ms, median 1.25, p90 2.53, max 6.23; 72365 bytes of frames

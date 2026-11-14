@@ -1,5 +1,9 @@
+load("@build_bazel_rules_apple//apple:apple.bzl", "local_provisioning_profile")
+load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application")
+load("@build_bazel_rules_apple//apple:versioning.bzl", "apple_bundle_version")
 load("@isomer//tools/wasm:mixed.bzl", "wasm_mixed_native")
 load("@isomer//tools/wasm:side_modules.bzl", "wasm_runtime_module", "wasm_side_module")
+load("@isomer_signing//:signing.bzl", "TEAM_ID")
 load("@rules_swift//swift:swift.bzl", "swift_library", "swift_test")
 
 # Does a native set chosen without a feature serve it? 2048 (a feature the
@@ -167,3 +171,51 @@ VARIANTS = [
     ("interpreted", "storybook"),
     ("profile", "storybook"),
 ]]
+
+# The probe for the phone (probe/ProbeApp.swift): mixed mode after other
+# engines, and when WasmKit's guard-page reservation is refused. Manual; a
+# device build needs a team's provisioning profile.
+swift_library(
+    name = "probe_lib",
+    srcs = ["probe/ProbeApp.swift"],
+    tags = ["manual"],
+    deps = [
+        ":native_corpus_closure",
+        "@isomer//shared/wasm_host:mixed_runtime",
+        "@isomer//shared/wasm_host:wasm_runtime",
+        "@isomer//shared/wasm_host:wasmkit_runtime",
+    ],
+)
+
+apple_bundle_version(
+    name = "probe_version",
+    build_version = "1",
+    short_version_string = "1.0",
+    tags = ["manual"],
+)
+
+local_provisioning_profile(
+    name = "probe_profile",
+    profile_name = "iOS Team Provisioning Profile: *",
+    tags = ["manual"],
+    team_id = TEAM_ID,
+)
+
+ios_application(
+    name = "mixed_probe_ios_application",
+    bundle_id = "com.LoganShire.IsomerMixedProbe",
+    families = ["iphone"],
+    infoplists = ["probe/Info.plist"],
+    minimum_os_version = "18.0",
+    provisioning_profile = ":probe_profile",
+    resources = [
+        "storybook_routed.txt",
+        ":game2048_side",
+        ":heldout_runtime.wasm",
+        ":native_corpus_closure_shim",
+        ":native_corpus_closure_slots",
+    ],
+    tags = ["manual"],
+    version = ":probe_version",
+    deps = [":probe_lib"],
+)

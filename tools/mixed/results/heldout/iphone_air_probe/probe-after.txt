@@ -1,0 +1,6 @@
+phase after, Version 27.2.1 (Build 24B156), 11734 MB
+interpreted runtime 1 running
+interpreted runtime 2 running
+mixed launched: native code OFF (interpreted)
+[mixed] no guard pages for the runtime's memory (the reservation was refused): running interpreted
+drag events: 200, mean 5.29 ms, median 6.07, p90 11.59, max 30.89; 65258 bytes of frames

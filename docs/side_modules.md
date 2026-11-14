@@ -121,9 +121,10 @@ to propose to AttilaTheFun/WasmKit; isomer pins them until then.
 
 Open: a trap in native code (or in interpreted code under it) ends the process
 (native code can't unwind into Swift); native code without bounds checks needs
-WasmKit's guard pages (launch fails without them; `bounds_checks = True`
-builds the slower checked code: 7.4 MB against 3.9 MB for the Storybook's
-runtime); the native set comes from profiling, and paths the profile didn't
+WasmKit's guard pages, a reservation of 4 GiB and more that an iPhone grants
+a process only a few of (without one the guest runs interpreted,
+`MixedWasmKitRuntime.isNative` false; `bounds_checks = True` builds the
+slower checked code, 7.4 MB against 3.9 MB for the Storybook's runtime); the native set comes from profiling, and paths the profile didn't
 cover run interpreted; no rule yet runs the profiling.
 
 ## Measurements

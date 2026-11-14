@@ -1,0 +1,2 @@
+phase reserve, Version 27.2.1 (Build 24B156), 11734 MB
+reservations granted: 1, the next refused
