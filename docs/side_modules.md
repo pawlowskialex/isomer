@@ -48,10 +48,18 @@ relocations and constructors (Swift's `swiftrt.o` registers its metadata).
   finds each relative pointer's site from the inputs' relocations and the
   link map, and removes exactly those stores (every site must be accounted
   for, or it fails).
+- **What a runtime exports.** Every public symbol of Isomer's runtime is
+  129,053 exports, more than the 100,000 the WebAssembly JS API lets a
+  browser or web view load (WasmKit has no such limit).
+  `wasm_runtime_module(exports_for = [<side modules>])` exports what the host
+  calls and what those side modules import instead: 1,001 for the
+  Storybook's (tools/wasm/side_module_imports). A feature binds to its
+  runtime's build either way.
 - **Checked by rendering.** examples' //tests/side_modules: the Storybook's
-  app as a side module over its runtime module renders, under WasmKit, what
-  its self-contained reactor renders, byte for byte (the first frame and a
-  tap on every first-frame tap target: each story's page).
+  app as a side module over its runtime module renders what its
+  self-contained reactor renders, byte for byte (the first frame and a tap on
+  every first-frame tap target: each story's page), under WasmKit and in V8
+  with the web's linker.
 
 | (-c opt) | Self-contained reactor | Side module |
 | --- | --- | --- |
