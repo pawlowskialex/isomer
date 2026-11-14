@@ -1,11 +1,17 @@
-// One recorded game of 2048 (tools/mixed/replay/make_game.swift's: 150
-// seeded swipes at a person's pace) played as the drag events a host sends,
-// paced to a 120 Hz display, against 2048 as a side module over a runtime
-// module: in mixed mode with the native set named by HELDOUT_SET, or
-// interpreted (HELDOUT_MODE=interpreted). Prints event-to-frame latency for
-// the drag's `changed` events, its release and the animation frames after;
-// with ISO_MIXED_COUNT=1, native code's calls into the interpreter. The last
-// frame's hash says every run ended on the same board.
+// Runs a feature as a side module over a runtime module and times each
+// event to its frame, paced to a 120 Hz display (HELDOUT_FEATURE):
+//   - game2048: one recorded game (tools/mixed/replay/make_game.swift's
+//     seeded swipes, HELDOUT_SWIPES of them);
+//   - storybook: every first-frame tap target (each story's page), its
+//     frames, and drags on the drag targets it shows;
+//   - corpus: tools/wasm_mixed_corpus's screens for HELDOUT_SECONDS, a
+//     driver operating whatever each screen's frames show (taps, drags,
+//     text, sliders, toggles and pickers, long presses, context menus).
+// HELDOUT_MODE: mixed (with the native set HELDOUT_SET), interpreted, or
+// profile (interpreted, each runtime function's calls and self time written
+// to profile_<feature>.txt in the test's outputs). With ISO_MIXED_COUNT=1,
+// mixed mode also counts native code's calls into the interpreter. The last
+// frame's hash says whether runs ended the same.
 
 import CoreFoundation
 import Foundation
@@ -67,38 +73,60 @@ final class HeldOutBench: XCTestCase {
 
     func text(_ relative: String) throws -> String { String(decoding: try artifact(relative), as: UTF8.self) }
 
-    func testPlayOneGame() throws {
+    /// Interactive ids by kind (TreeEncoder's suffixes) a driver can send
+    /// events to, with the values it sends.
+    static let kinds = [".tap", ".drag", ".text", ".slider", ".host", ".longpress", ".ctx"]
+
+    func testRun() throws {
+        let feature = environment["HELDOUT_FEATURE"] ?? "game2048"
+        let mode = environment["HELDOUT_MODE"] ?? "mixed"
         let set = environment["HELDOUT_SET"] ?? "storybook"
-        let interpreted = environment["HELDOUT_MODE"] == "interpreted"
-        let label = interpreted ? "interpreted" : "mixed, \(set) set"
+        let label = "\(feature), " + (mode == "mixed" ? "mixed, \(set) set" : mode)
 
         var lastFrame: [UInt8] = []
         var stream: [UInt8] = []
+        var keepStream = true
         var renderRequested = false
+        var frames = 0
+        var onFrame: ([UInt8]) -> Void = { _ in }
         let imports = WasmHostImports(
-            onRenderTree: { lastFrame = $0; stream += $0 },
+            onRenderTree: { bytes in
+                lastFrame = bytes
+                frames += 1
+                if ProcessInfo.processInfo.environment["HELDOUT_DEBUG"] != nil, frames < 6 {
+                    print("[frame \(frames)] \(bytes.count) bytes: \(String(decoding: bytes.prefix(400).map { $0 >= 32 && $0 < 127 ? $0 : 46 }, as: UTF8.self))")
+                }
+                if keepStream { stream += bytes }
+                onFrame(bytes)
+            },
             onLog: { print("guest log: \($0)") },
             epochMillis: { Date().timeIntervalSince1970 * 1000 },
             onScheduleRender: { renderRequested = true })
 
         let runtime: any WasmRuntime
         var mixed: MixedWasmKitRuntime?
+        var profile: WasmKitFunctionProfile?
         let launchStart = Date()
-        if interpreted {
-            let wasmKit = WasmKitRuntime()
-            try wasmKit.launch(wasm: try artifact("heldout_runtime.wasm"), hostImports: imports)
-            try wasmKit.loadSideModule(wasm: try artifact("game2048_side.wasm"))
-            runtime = wasmKit
-        } else {
+        let side = try artifact("\(feature)_side.wasm")
+        if mode == "mixed" {
             let native = MixedNativePart(
                 shim: try artifact("native_\(set)_generated/shim.wasm"),
                 slots: try text("native_\(set)_generated/slots.txt"),
                 routed: Set(try text("storybook_routed.txt").split(separator: "\n").map(String.init)))
             let m = MixedWasmKitRuntime(native: native)
             try m.launch(wasm: try artifact("heldout_runtime.wasm"), hostImports: imports)
-            try m.loadSideModule(wasm: try artifact("game2048_side.wasm"))
+            try m.loadSideModule(wasm: side)
             runtime = m
             mixed = m
+        } else {
+            let wasmKit = WasmKitRuntime()
+            if mode == "profile" {
+                profile = WasmKitFunctionProfile()
+                wasmKit.profile = profile
+            }
+            try wasmKit.launch(wasm: try artifact("heldout_runtime.wasm"), hostImports: imports)
+            try wasmKit.loadSideModule(wasm: side)
+            runtime = wasmKit
         }
 
         // Runs the main thread's loop until the guest is idle (mixed: its
@@ -119,26 +147,20 @@ final class HeldOutBench: XCTestCase {
         var tick = DispatchTime.now().uptimeNanoseconds
         func nextTick() {
             tick += 8_333_333
+            let now = DispatchTime.now().uptimeNanoseconds
+            if now > tick + 100_000_000 { tick = now }  // far behind (profiling): don't hurry to catch up
             while DispatchTime.now().uptimeNanoseconds < tick {
                 CFRunLoopRunInMode(.defaultMode, 0.0005, true)
             }
         }
-
-        _ = try runtime.call("iso_hot_start", [.f64(420), .f64(912)])
-        _ = try runtime.call("iso_hot_render", [])
-        settle()
-        let firstFrameMs = Date().timeIntervalSince(launchStart) * 1000
-        let dragID = try XCTUnwrap(Self.firstID(in: stream, suffix: ".drag"), "no drag gesture in the first frame")
-        _ = mixed?.takeCrossings()
-
-        func send(_ value: String) throws {
-            let id = Array(dragID.utf8), v = Array(value.utf8)
-            let idPointer = try runtime.call("iso_hot_alloc", [.i32(Int32(id.count))])?.u32Value ?? 0
-            let valuePointer = try runtime.call("iso_hot_alloc", [.i32(Int32(v.count))])?.u32Value ?? 0
-            runtime.writeBytes(idPointer, id)
+        func send(_ id: String, _ value: String) throws {
+            let idBytes = Array(id.utf8), v = Array(value.utf8)
+            let idPointer = try runtime.call("iso_hot_alloc", [.i32(Int32(idBytes.count))])?.u32Value ?? 0
+            let valuePointer = try runtime.call("iso_hot_alloc", [.i32(Int32(max(v.count, 1)))])?.u32Value ?? 0
+            runtime.writeBytes(idPointer, idBytes)
             runtime.writeBytes(valuePointer, v)
             _ = try runtime.call("iso_hot_event", [
-                .i32(Int32(bitPattern: idPointer)), .i32(Int32(id.count)),
+                .i32(Int32(bitPattern: idPointer)), .i32(Int32(idBytes.count)),
                 .i32(Int32(bitPattern: valuePointer)), .i32(Int32(v.count)),
             ])
             _ = try runtime.call("iso_hot_free", [.i32(Int32(bitPattern: idPointer))])
@@ -150,26 +172,125 @@ final class HeldOutBench: XCTestCase {
             _ = try runtime.call("iso_hot_render", [])
         }
 
-        var drag = Samples(), release = Samples(), animation = Samples()
+        // As a host injecting its dependencies does (WasmView's URLSession
+        // hosts): registering one installs the guest's Swift executor, without
+        // which no Task runs (2048's new tiles, the corpus's timers).
+        _ = try runtime.call("swift_ffi_isomer_register_HTTPHost", [])
+        settle()
+        _ = try runtime.call("iso_hot_start", [.f64(420), .f64(912)])
+        _ = try runtime.call("iso_hot_render", [])
+        settle()
+        let firstFrameMs = Date().timeIntervalSince(launchStart) * 1000
+        _ = mixed?.takeCrossings()
+
+        var events = Samples(), release = Samples(), animation = Samples()
+        var detail = ""
         let playStart = Date()
-        let swipes = Int(environment["HELDOUT_SWIPES"] ?? "") ?? 150
-        for swipe in Swipe.game().prefix(swipes) {
-            let steps = max(2, Int(swipe.duration * 120))
-            for k in 1...steps {
+        switch feature {
+        case "game2048":
+            let dragID = try XCTUnwrap(Self.ids(in: stream, suffix: ".drag").first, "no drag gesture in the first frame")
+            let swipes = Int(environment["HELDOUT_SWIPES"] ?? "") ?? 150
+            for swipe in Swipe.game().prefix(swipes) {
+                let steps = max(2, Int(swipe.duration * 120))
+                for k in 1...steps {
+                    nextTick()
+                    let f = Double(k) / Double(steps)
+                    events.add(try timed { try send(dragID, "changed:\(Int(swipe.dx * f)),\(Int(swipe.dy * f))") })
+                }
                 nextTick()
-                let f = Double(k) / Double(steps)
-                drag.add(try timed { try send("changed:\(Int(swipe.dx * f)),\(Int(swipe.dy * f))") })
+                release.add(try timed { try send(dragID, "ended:\(Int(swipe.dx)),\(Int(swipe.dy))") })
+                for _ in 0..<Int(swipe.wait * 120) {
+                    nextTick()
+                    if renderRequested { animation.add(try timed { try frame() }) }
+                }
             }
-            nextTick()
-            release.add(try timed { try send("ended:\(Int(swipe.dx)),\(Int(swipe.dy))") })
-            let waitTicks = Int(swipe.wait * 120)
-            for _ in 0..<waitTicks {
+            XCTAssertEqual(release.values.count, swipes)
+        case "storybook":
+            // Every first-frame tap target (each story's page), the frames
+            // after it, and a drag on each drag target it shows.
+            let taps = Self.ids(in: stream, suffix: ".tap")
+            keepStream = false
+            var pageStream: [UInt8] = []
+            onFrame = { pageStream += $0 }
+            for id in taps {
+                pageStream = []
+                nextTick()
+                events.add(try timed { try send(id, "") })
+                for _ in 0..<30 {
+                    nextTick()
+                    if renderRequested { animation.add(try timed { try frame() }) }
+                }
+                for drag in Self.ids(in: pageStream, suffix: ".drag").prefix(2) {
+                    for k in 1...8 {
+                        nextTick()
+                        events.add(try timed { try send(drag, "changed:\(k * 6),\(k * 3)") })
+                    }
+                    release.add(try timed { try send(drag, "ended:48,24") })
+                }
+            }
+            detail = "\(taps.count) taps"
+            XCTAssertGreaterThan(taps.count, 50)
+        default:
+            // The corpus: each screen's interactive ids (from its frames), a
+            // driver's event every third tick in turn; a drag is eight
+            // `changed` and an `ended`.
+            keepStream = false
+            var pool: [String] = []
+            var seen: Set<String> = []
+            var screen = -1, screensSeen = 0
+            let marker = Array("corpus-screen-".utf8)
+            onFrame = { bytes in
+                if let n = Self.number(after: marker, in: bytes), n != screen {
+                    screen = n
+                    screensSeen += 1
+                    pool = []
+                    seen = []
+                }
+                for kind in Self.kinds {
+                    for id in Self.ids(in: bytes, suffix: kind) where seen.insert(id).inserted { pool.append(id) }
+                }
+            }
+            onFrame(stream)
+            let seconds = Double(environment["HELDOUT_SECONDS"] ?? "") ?? 205
+            var n = 0, next = 0
+            var dragging: (id: String, step: Int)?
+            var byKind: [String: Int] = [:]
+            while Date().timeIntervalSince(playStart) < seconds {
                 nextTick()
                 if renderRequested { animation.add(try timed { try frame() }) }
+                n += 1
+                guard n % 3 == 0 else { continue }
+                if let d = dragging {
+                    if d.step < 8 {
+                        events.add(try timed { try send(d.id, "changed:\((d.step + 1) * 7),\((d.step + 1) * (n % 2 == 0 ? 3 : -3))") })
+                        dragging = (d.id, d.step + 1)
+                    } else {
+                        release.add(try timed { try send(d.id, "ended:56,0") })
+                        dragging = nil
+                    }
+                    continue
+                }
+                guard !pool.isEmpty else { continue }
+                let id = pool[next % pool.count]
+                next += 1
+                let kind = Self.kinds.first { id.hasSuffix($0) } ?? ".tap"
+                byKind[kind, default: 0] += 1
+                switch kind {
+                case ".drag": dragging = (id, 0)
+                case ".text": events.add(try timed { try send(id, "typed \(n)") })
+                case ".slider": events.add(try timed { try send(id, "0.\(n % 10)") })
+                case ".host": events.add(try timed { try send(id, ["1", "0", "2", "1", "back"][next % 5]) })
+                case ".longpress":
+                    events.add(try timed { try send(id, "press:1") })
+                    events.add(try timed { try send(id, "fire") })
+                    events.add(try timed { try send(id, "press:0") })
+                case ".ctx": events.add(try timed { try send(id, "0") })
+                default: events.add(try timed { try send(id, "") })
+                }
             }
+            detail = "\(screensSeen) screens; events " + byKind.sorted { $0.key < $1.key }.map { "\($0.key) \($0.value)" }.joined(separator: ", ")
         }
         let playSeconds = Date().timeIntervalSince(playStart)
-        // Whatever is left (a last tile's animation), then the board.
         for _ in 0..<60 {
             nextTick()
             if renderRequested { try frame(); settle() }
@@ -178,46 +299,67 @@ final class HeldOutBench: XCTestCase {
         var hash: UInt64 = 0xcbf2_9ce4_8422_2325
         for byte in lastFrame { hash = (hash ^ UInt64(byte)) &* 0x100_0000_01b3 }
         var report = """
-        [heldout] \(label)
-        [heldout] launch to first frame: \(String(format: "%.0f", firstFrameMs)) ms; played in \(String(format: "%.1f", playSeconds)) s
-        [heldout] drag changed → frame: \(drag.summary)
+        [heldout] \(label) \(detail)
+        [heldout] launch to first frame: \(String(format: "%.0f", firstFrameMs)) ms; played in \(String(format: "%.1f", playSeconds)) s; \(frames) frames
+        [heldout] events → frame: \(events.summary)
         [heldout] release → frame: \(release.summary)
         [heldout] animation frames: \(animation.summary)
-        [heldout] busy: \(String(format: "%.0f", (drag.values + release.values + animation.values).reduce(0, +))) ms
+        [heldout] busy: \(String(format: "%.0f", (events.values + release.values + animation.values).reduce(0, +))) ms
         [heldout] last frame: \(lastFrame.count) bytes, hash \(String(hash, radix: 16))
         """
-        if let mixed, ProcessInfo.processInfo.environment["ISO_MIXED_COUNT"] != nil {
+        let out = environment["TEST_UNDECLARED_OUTPUTS_DIR"]
+        if let mixed, environment["ISO_MIXED_COUNT"] != nil {
             let c = mixed.takeCrossings()
             report += String(format: "\n[heldout] into the interpreter: runtime functions %d calls (%.0f ms, outermost), feature %d calls (%.0f ms), host %d",
                              c.runtimeCalls, Double(c.runtimeNanos) / 1e6, c.featureCalls, Double(c.featureNanos) / 1e6, c.hostCalls)
             let slots = c.runtimeSlots.sorted { $0.value > $1.value }
                 .map { "\($0.value) slot \($0.key) \(c.runtimeSlotNanos[$0.key] ?? 0)" }.joined(separator: "\n")
-            if let out = environment["TEST_UNDECLARED_OUTPUTS_DIR"] {
-                try slots.write(toFile: "\(out)/crossings_\(set).txt", atomically: true, encoding: .utf8)
-            }
+            if let out { try slots.write(toFile: "\(out)/crossings_\(feature)_\(set).txt", atomically: true, encoding: .utf8) }
+        }
+        if let profile {
+            let total = profile.selfNanos.reduce(0, +)
+            report += String(format: "\n[heldout] profile: %d runtime functions called, %.0f ms in the runtime's own code, %.0f ms in other modules'",
+                             profile.calls.filter { $0 > 0 }.count, Double(total) / 1e6, Double(profile.otherNanos) / 1e6)
+            if let out { try profile.report().write(toFile: "\(out)/profile_\(feature).txt", atomically: true, encoding: .utf8) }
         }
         print(report)
-        if let out = environment["TEST_UNDECLARED_OUTPUTS_DIR"] {
-            try report.write(toFile: "\(out)/report.txt", atomically: true, encoding: .utf8)
-        }
-        XCTAssertEqual(release.values.count, swipes)
+        if let out { try report.write(toFile: "\(out)/report.txt", atomically: true, encoding: .utf8) }
     }
 
-    /// The first `<…>.drag` id in a frame's bytes (DragBench's).
-    static func firstID(in bytes: [UInt8], suffix: String) -> String? {
-        let s = Array(suffix.utf8)
-        func ok(_ c: UInt8) -> Bool { (c >= 48 && c <= 57) || c == 46 || (c >= 97 && c <= 122) }
+    /// The decimal number right after `marker` in a frame's bytes, if any.
+    static func number(after marker: [UInt8], in bytes: [UInt8]) -> Int? {
         var i = 0
-        while i + s.count <= bytes.count {
-            if Array(bytes[i..<(i + s.count)]) == s {
-                var start = i
-                while start > 0 && ok(bytes[start - 1]) { start -= 1 }
-                var id = String(decoding: bytes[start..<(i + s.count)], as: UTF8.self)
-                while id.hasPrefix(".") { id.removeFirst() }
-                if !id.isEmpty { return id }
+        while i + marker.count < bytes.count {
+            if bytes[i] == marker[0], bytes[i..<(i + marker.count)].elementsEqual(marker) {
+                var j = i + marker.count, value = 0, digits = 0
+                while j < bytes.count, (48...57).contains(bytes[j]) {
+                    value = value * 10 + Int(bytes[j] - 48)
+                    j += 1
+                    digits += 1
+                }
+                if digits > 0 { return value }
             }
             i += 1
         }
         return nil
+    }
+
+    /// Every distinct `<…><suffix>` id in a frame's bytes, in order.
+    static func ids(in bytes: [UInt8], suffix: String) -> [String] {
+        let s = Array(suffix.utf8)
+        func ok(_ c: UInt8) -> Bool { (c >= 48 && c <= 57) || c == 46 || (c >= 97 && c <= 122) }
+        var out: [String] = []
+        var i = 0
+        while i + s.count <= bytes.count {
+            if bytes[i] == s[0], bytes[i..<(i + s.count)].elementsEqual(s), i + s.count == bytes.count || !ok(bytes[i + s.count]) {
+                var start = i
+                while start > 0 && ok(bytes[start - 1]) { start -= 1 }
+                var id = String(decoding: bytes[start..<(i + s.count)], as: UTF8.self)
+                while id.hasPrefix(".") { id.removeFirst() }
+                if id.count > s.count, !out.contains(id) { out.append(id) }
+            }
+            i += 1
+        }
+        return out
     }
 }

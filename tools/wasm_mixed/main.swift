@@ -16,6 +16,10 @@ let usage = """
           the table slots wasm-split added, as the runtime's function indices
       bridge <hot.wasm> <hot.h> <out dir>
           mixed_glue.c, mixed_glue.h and shim.wat for wasm2c's hot.h
+      profile-set <runtime.wasm> <out set.txt> [--time F] [--calls N] <profile.txt>...
+          a native set from WasmKitFunctionProfile profiles of the runtime:
+          the functions that took F of its time (0.99) and every function
+          called N times or more (1000), by name
       generate --wasm-split <path> --wasm2c <path> --wat2wasm <path>
                --runtime <runtime.wasm> --set <set.txt> --entries <keep> --out <dir>
                [--max-size <bytes>] [--modules <A,B>] [--closure 1] [--wasi-run <wasi_run>]
@@ -86,6 +90,19 @@ do {
     case "bridge":
         let a = positional(rest, 3, command)
         try Bridge.run(hotWasm: a[0], hotHeader: a[1], outDir: a[2])
+    case "profile-set":
+        var time = 0.99, calls = 1000
+        var files: [String] = []
+        var it = rest[...]
+        while let a = it.popFirst() {
+            switch a {
+            case "--time": time = Double(it.popFirst() ?? "") ?? time
+            case "--calls": calls = Int(it.popFirst() ?? "") ?? calls
+            default: files.append(a)
+            }
+        }
+        guard files.count >= 3 else { fail("profile-set takes <runtime.wasm> <out set.txt> <profile.txt>...\n\n\(usage)") }
+        try ProfileSet.run(runtime: files[0], profiles: Array(files.dropFirst(2)), output: files[1], time: time, calls: calls)
     case "generate":
         try Generate.run(generateOptions(rest))
     case "-h", "--help", "help":

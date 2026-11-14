@@ -1,6 +1,6 @@
 load("@isomer//tools/wasm:mixed.bzl", "wasm_mixed_native")
 load("@isomer//tools/wasm:side_modules.bzl", "wasm_runtime_module", "wasm_side_module")
-load("@rules_swift//swift:swift.bzl", "swift_test")
+load("@rules_swift//swift:swift.bzl", "swift_library", "swift_test")
 
 # Does a native set chosen without a feature serve it? 2048 (a feature the
 # Storybook's profile never saw) plays one recorded game in mixed mode with:
@@ -17,6 +17,10 @@ load("@rules_swift//swift:swift.bzl", "swift_test")
 #   - closure: Isomer's modules (with HotBridge) and everything they and the
 #     entry points call directly, all the way down; no profile;
 #   - closure_set: the same, with the Storybook's set;
+#   - corpus: every runtime function the corpus ran (corpus_native_set.txt:
+#     `wasm_mixed profile-set` of the corpus's profile, bench_profile with
+#     HELDOUT_FEATURE=corpus), held out from both 2048 and the Storybook;
+#   - corpus_closure: the same with Isomer's modules and the closure;
 #   - interpreted: no native code (the side module under WasmKit).
 # The routed list is the Storybook's in both mixed runs, so only the set
 # differs. HeldOutBench.swift prints event-to-frame latency; with
@@ -25,9 +29,53 @@ load("@rules_swift//swift:swift.bzl", "swift_test")
 #
 #   bazel test -c opt --test_output=streamed //tools/wasm_bench/heldout:all
 
+# The corpus (tools/wasm_mixed_corpus): an app of 80 screens made
+# methodically from SwiftUI's pieces, to profile the runtime with instead of
+# any one app.
+genrule(
+    name = "corpus_source",
+    outs = [
+        "corpus/Corpus.swift",
+        "corpus/coverage.txt",
+    ],
+    cmd = "$(location @isomer//tools/wasm_mixed_corpus) $(location corpus/Corpus.swift) $(location corpus/coverage.txt) > /dev/null",
+    tags = ["manual"],
+    tools = ["@isomer//tools/wasm_mixed_corpus"],
+)
+
+swift_library(
+    name = "corpus_lib",
+    srcs = ["corpus/Corpus.swift"],
+    alwayslink = True,
+    copts = ["-parse-as-library"],
+    module_name = "Corpus",
+    tags = ["manual"],
+    deps = ["@isomer//wasm/libraries/swift_ui"],
+)
+
+wasm_side_module(
+    name = "corpus_side",
+    tags = ["manual"],
+    deps = [":corpus_lib"],
+)
+
+# The Storybook's app, held out too: the corpus never saw it.
+wasm_side_module(
+    name = "storybook_side",
+    tags = ["manual"],
+    deps = [
+        "//storybook",
+        "//wasm/example_full_feature:example_full_lib",
+    ],
+)
+
 wasm_runtime_module(
     name = "heldout_runtime",
-    exports_for = [":game2048_side"],
+    exports_for = [
+        ":corpus_side",
+        ":game2048_side",
+        ":storybook_side",
+    ],
     tags = ["manual"],
     deps = [
         "//shared/platform_services",
@@ -64,6 +112,8 @@ VARIANTS = [
     ("rules_runtime", "no_profile_set.txt", 128, ISOMER_MODULES + ["C"], False),
     ("closure", "no_profile_set.txt", 0, ISOMER_MODULES + ["HotBridge"], True),
     ("closure_set", "storybook_native_set.txt", 0, ISOMER_MODULES + ["HotBridge"], True),
+    ("corpus", "corpus_native_set.txt", 0, [], False),
+    ("corpus_closure", "corpus_native_set.txt", 0, ISOMER_MODULES + ["HotBridge"], True),
 ]
 
 [wasm_mixed_native(
@@ -83,14 +133,16 @@ VARIANTS = [
     srcs = ["HeldOutBench.swift"],
     data = [
         "storybook_routed.txt",
+        ":corpus_side",
         ":game2048_side",
+        ":storybook_side",
         ":heldout_runtime.wasm",
         ":native_%s_shim" % set_name,
         ":native_%s_slots" % set_name,
     ],
     env = {
         "HELDOUT_SET": set_name,
-        "HELDOUT_MODE": "interpreted" if variant == "interpreted" else "mixed",
+        "HELDOUT_MODE": {"interpreted": "interpreted", "profile": "profile"}.get(variant, "mixed"),
     },
     tags = ["manual"],
     target_compatible_with = ["@platforms//os:macos"],
@@ -110,5 +162,8 @@ VARIANTS = [
     ("rules_runtime", "rules_runtime"),
     ("closure", "closure"),
     ("closure_set", "closure_set"),
+    ("corpus", "corpus"),
+    ("corpus_closure", "corpus_closure"),
     ("interpreted", "storybook"),
+    ("profile", "storybook"),
 ]]

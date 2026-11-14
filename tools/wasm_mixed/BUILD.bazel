@@ -26,6 +26,7 @@ swift_binary(
         "Bridge.swift",
         "Generate.swift",
         "MapSlots.swift",
+        "ProfileSet.swift",
         "PythonText.swift",
         "Select.swift",
         "Slim.swift",

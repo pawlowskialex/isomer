@@ -37,3 +37,48 @@ What it found:
   interpreted is reached indirectly (reabstraction thunks, the Swift
   runtime's value witnesses and casts, the standard library's deinits,
   String, SwiftProtobuf), which no direct-call closure finds.
+
+## A corpus instead of an app (reps4-6.txt)
+
+The native set from a corpus no app is in: tools/wasm_mixed_corpus writes an
+app of 80 screens made methodically from a catalog of SwiftUI's pieces (43),
+modifiers (30), containers (11) and screen patterns (8), each screen's root a
+NavigationStack, a NavigationSplitView or a TabView in turn, every screen's
+state changed by its timer; the bench's driver operates whatever each
+screen's frames show (taps, drags, text, sliders, toggles and pickers, long
+presses, context menus). WasmKitFunctionProfile profiles it under the
+interpreter (bench_profile, HELDOUT_FEATURE=corpus; profile_corpus3.txt), and
+`wasm_mixed profile-set` makes the set: every runtime function that ran
+(4,896 of 104,052). 2048 and the Storybook are both held out. The bench now
+registers a swift_ffi dependency, as hosts do, which installs the guest's
+executor: 2048's tiles spawn (in the runs above, they didn't, in every
+variant alike).
+
+Busy time, median of 3 (2048: 60 swipes; Storybook: 99 taps, their frames,
+drags on what the pages show):
+
+| Native set | Profile | 2048 | Storybook | Native code |
+| --- | --- | --- | --- | --- |
+| interpreted | — | 19.7 s | 26.1 s | — |
+| corpus, round 1 | corpus | 9.1 s | 20.5 s | 3.8 MB |
+| corpus, round 3 | corpus | 6.6 s | 5.1 s | 4.1 MB |
+| corpus + modules + closure, round 3 | corpus | 6.1 s | 4.3 s | 9.8 MB |
+| 2048's own | 2048 | 7.1 s | 4.6 s | 5.0 MB |
+| the Storybook's own | Storybook | 10.2 s | 4.8 s | 4.8 MB |
+| Storybook's + modules + closure | Storybook | 6.2 s | 3.7 s | 10.0 MB |
+
+(rounds 2-3 of reps5.txt for the apps' own sets; reps6.txt for round 3.)
+
+Round 1's corpus missed one function the Storybook depends on:
+`NavigationSplitView`'s node, the Storybook's root, so everything beneath it
+ran interpreted (96% of the time). Round 2 added root navigation structures
+and text runs (concatenated, markdown, AttributedString), long text and
+lists; round 3 `ForEach` over Identifiable data, `List(selection:)` with
+tags and sections, `accessibilityIdentifier`, `background` with a view: each
+a kind of API a held-out app showed missing (ISO_MIXED_COUNT=1's
+crossings), added to the catalog, not the app.
+
+Round 3's corpus (80 screens of 8 items) met every piece and modifier, but
+only 226 of the 473 piece × container pairs, 965 of 1,290 piece × modifier
+and 80 of 88 container × pattern: the catalog had outgrown the screens'
+arithmetic (fixed after these measurements).

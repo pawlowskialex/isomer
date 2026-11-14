@@ -1,0 +1,211 @@
+1 game2048 corpus [heldout] game2048, mixed, corpus set 
+1 game2048 corpus [heldout] launch to first frame: 238 ms; played in 38.3 s; 3030 frames
+1 game2048 corpus [heldout] events → frame: n 1217, mean 3.699 ms, median 2.420, p90 9.033, p99 13.508, max 39.352, total 4502 ms
+1 game2048 corpus [heldout] release → frame: n 60, mean 11.397 ms, median 12.327, p90 19.280, p99 24.847, max 24.847, total 684 ms
+1 game2048 corpus [heldout] animation frames: n 1403, mean 5.503 ms, median 4.674, p90 10.195, p99 14.510, max 25.635, total 7721 ms
+1 game2048 corpus [heldout] busy: 12906 ms
+1 game2048 corpus [heldout] last frame: 328 bytes, hash 6ab7a4511e770cbc
+1 game2048 corpus_closure [heldout] game2048, mixed, corpus_closure set 
+1 game2048 corpus_closure [heldout] launch to first frame: 168 ms; played in 38.3 s; 3038 frames
+1 game2048 corpus_closure [heldout] events → frame: n 1217, mean 3.463 ms, median 2.342, p90 8.680, p99 13.168, max 20.554, total 4215 ms
+1 game2048 corpus_closure [heldout] release → frame: n 60, mean 11.144 ms, median 11.923, p90 18.562, p99 22.718, max 22.718, total 669 ms
+1 game2048 corpus_closure [heldout] animation frames: n 1414, mean 5.093 ms, median 4.068, p90 10.101, p99 14.252, max 23.178, total 7201 ms
+1 game2048 corpus_closure [heldout] busy: 12084 ms
+1 game2048 corpus_closure [heldout] last frame: 328 bytes, hash 6ab7a4511e770cbc
+1 game2048 closure_set [heldout] game2048, mixed, closure_set set 
+1 game2048 closure_set [heldout] launch to first frame: 222 ms; played in 38.4 s; 3027 frames
+1 game2048 closure_set [heldout] events → frame: n 1217, mean 3.433 ms, median 2.460, p90 8.164, p99 12.719, max 27.165, total 4178 ms
+1 game2048 closure_set [heldout] release → frame: n 60, mean 11.573 ms, median 11.281, p90 19.929, p99 27.926, max 27.926, total 694 ms
+1 game2048 closure_set [heldout] animation frames: n 1408, mean 5.378 ms, median 4.374, p90 10.171, p99 15.877, max 38.524, total 7572 ms
+1 game2048 closure_set [heldout] busy: 12444 ms
+1 game2048 closure_set [heldout] last frame: 328 bytes, hash 6ab7a4511e770cbc
+1 game2048 storybook [heldout] game2048, mixed, storybook set 
+1 game2048 storybook [heldout] launch to first frame: 288 ms; played in 38.4 s; 2978 frames
+1 game2048 storybook [heldout] events → frame: n 1217, mean 3.502 ms, median 2.279, p90 8.159, p99 15.017, max 26.127, total 4261 ms
+1 game2048 storybook [heldout] release → frame: n 60, mean 31.159 ms, median 35.415, p90 45.507, p99 62.936, max 62.936, total 1870 ms
+1 game2048 storybook [heldout] animation frames: n 1404, mean 7.056 ms, median 6.354, p90 9.687, p99 40.224, max 53.568, total 9906 ms
+1 game2048 storybook [heldout] busy: 16037 ms
+1 game2048 storybook [heldout] last frame: 0 bytes, hash cbf29ce484222325
+1 game2048 game2048 [heldout] game2048, mixed, game2048 set 
+1 game2048 game2048 [heldout] launch to first frame: 180 ms; played in 38.3 s; 3119 frames
+1 game2048 game2048 [heldout] events → frame: n 1217, mean 1.809 ms, median 1.444, p90 3.448, p99 8.733, max 12.960, total 2201 ms
+1 game2048 game2048 [heldout] release → frame: n 60, mean 12.418 ms, median 13.778, p90 18.520, p99 22.587, max 22.587, total 745 ms
+1 game2048 game2048 [heldout] animation frames: n 1485, mean 2.585 ms, median 2.426, p90 3.255, p99 9.721, max 12.460, total 3839 ms
+1 game2048 game2048 [heldout] busy: 6785 ms
+1 game2048 game2048 [heldout] last frame: 328 bytes, hash 6ab7a4511e770cbc
+1 storybook corpus [heldout] storybook, mixed, corpus set 99 taps
+1 storybook corpus [heldout] launch to first frame: 193 ms; played in 25.8 s; 770 frames
+1 storybook corpus [heldout] events → frame: n 131, mean 14.634 ms, median 14.693, p90 24.189, p99 30.533, max 32.672, total 1917 ms
+1 storybook corpus [heldout] release → frame: n 4, mean 5.717 ms, median 5.570, p90 6.406, p99 6.406, max 6.406, total 23 ms
+1 storybook corpus [heldout] animation frames: n 563, mean 6.408 ms, median 6.211, p90 8.351, p99 11.383, max 19.904, total 3608 ms
+1 storybook corpus [heldout] busy: 5548 ms
+1 storybook corpus [heldout] last frame: 0 bytes, hash cbf29ce484222325
+1 storybook corpus_closure [heldout] storybook, mixed, corpus_closure set 99 taps
+1 storybook corpus_closure [heldout] launch to first frame: 148 ms; played in 25.8 s; 770 frames
+1 storybook corpus_closure [heldout] events → frame: n 131, mean 12.614 ms, median 14.646, p90 20.094, p99 24.843, max 26.924, total 1652 ms
+1 storybook corpus_closure [heldout] release → frame: n 4, mean 4.436 ms, median 4.569, p90 4.732, p99 4.732, max 4.732, total 18 ms
+1 storybook corpus_closure [heldout] animation frames: n 563, mean 4.786 ms, median 4.505, p90 6.601, p99 8.458, max 9.866, total 2694 ms
+1 storybook corpus_closure [heldout] busy: 4365 ms
+1 storybook corpus_closure [heldout] last frame: 0 bytes, hash cbf29ce484222325
+1 storybook closure_set [heldout] storybook, mixed, closure_set set 99 taps
+1 storybook closure_set [heldout] launch to first frame: 149 ms; played in 25.8 s; 770 frames
+1 storybook closure_set [heldout] events → frame: n 131, mean 10.735 ms, median 10.826, p90 18.387, p99 25.078, max 27.252, total 1406 ms
+1 storybook closure_set [heldout] release → frame: n 4, mean 3.776 ms, median 3.761, p90 3.936, p99 3.936, max 3.936, total 15 ms
+1 storybook closure_set [heldout] animation frames: n 563, mean 4.050 ms, median 3.862, p90 5.352, p99 7.327, max 9.097, total 2280 ms
+1 storybook closure_set [heldout] busy: 3702 ms
+1 storybook closure_set [heldout] last frame: 0 bytes, hash cbf29ce484222325
+1 storybook storybook [heldout] storybook, mixed, storybook set 99 taps
+1 storybook storybook [heldout] launch to first frame: 189 ms; played in 26.1 s; 770 frames
+1 storybook storybook [heldout] events → frame: n 131, mean 14.251 ms, median 12.827, p90 19.754, p99 136.243, max 181.334, total 1867 ms
+1 storybook storybook [heldout] release → frame: n 4, mean 4.672 ms, median 4.854, p90 5.013, p99 5.013, max 5.013, total 19 ms
+1 storybook storybook [heldout] animation frames: n 563, mean 5.114 ms, median 4.739, p90 6.886, p99 9.216, max 60.300, total 2879 ms
+1 storybook storybook [heldout] busy: 4765 ms
+1 storybook storybook [heldout] last frame: 0 bytes, hash cbf29ce484222325
+1 storybook game2048 [heldout] storybook, mixed, game2048 set 99 taps
+1 storybook game2048 [heldout] launch to first frame: 184 ms; played in 25.8 s; 770 frames
+1 storybook game2048 [heldout] events → frame: n 131, mean 13.249 ms, median 15.173, p90 21.084, p99 28.045, max 29.719, total 1736 ms
+1 storybook game2048 [heldout] release → frame: n 4, mean 4.673 ms, median 4.713, p90 4.868, p99 4.868, max 4.868, total 19 ms
+1 storybook game2048 [heldout] animation frames: n 563, mean 5.043 ms, median 4.662, p90 7.338, p99 8.946, max 10.831, total 2839 ms
+1 storybook game2048 [heldout] busy: 4593 ms
+1 storybook game2048 [heldout] last frame: 0 bytes, hash cbf29ce484222325
+2 game2048 corpus [heldout] game2048, mixed, corpus set 
+2 game2048 corpus [heldout] launch to first frame: 171 ms; played in 38.3 s; 3121 frames
+2 game2048 corpus [heldout] events → frame: n 1217, mean 1.555 ms, median 0.813, p90 3.424, p99 8.543, max 10.450, total 1893 ms
+2 game2048 corpus [heldout] release → frame: n 60, mean 12.675 ms, median 13.569, p90 17.936, p99 19.124, max 19.124, total 761 ms
+2 game2048 corpus [heldout] animation frames: n 1486, mean 2.682 ms, median 2.492, p90 3.339, p99 10.472, max 13.765, total 3985 ms
+2 game2048 corpus [heldout] busy: 6638 ms
+2 game2048 corpus [heldout] last frame: 328 bytes, hash 6ab7a4511e770cbc
+2 game2048 corpus_closure [heldout] game2048, mixed, corpus_closure set 
+2 game2048 corpus_closure [heldout] launch to first frame: 128 ms; played in 38.4 s; 3118 frames
+2 game2048 corpus_closure [heldout] events → frame: n 1217, mean 1.497 ms, median 0.766, p90 3.421, p99 7.893, max 9.947, total 1822 ms
+2 game2048 corpus_closure [heldout] release → frame: n 60, mean 11.927 ms, median 13.013, p90 16.373, p99 18.964, max 18.964, total 716 ms
+2 game2048 corpus_closure [heldout] animation frames: n 1484, mean 2.548 ms, median 2.361, p90 3.381, p99 9.566, max 33.417, total 3782 ms
+2 game2048 corpus_closure [heldout] busy: 6320 ms
+2 game2048 corpus_closure [heldout] last frame: 328 bytes, hash 6ab7a4511e770cbc
+2 game2048 closure_set [heldout] game2048, mixed, closure_set set 
+2 game2048 closure_set [heldout] launch to first frame: 127 ms; played in 38.3 s; 3117 frames
+2 game2048 closure_set [heldout] events → frame: n 1217, mean 1.471 ms, median 0.781, p90 3.337, p99 7.729, max 10.916, total 1790 ms
+2 game2048 closure_set [heldout] release → frame: n 60, mean 11.341 ms, median 12.804, p90 16.165, p99 21.086, max 21.086, total 680 ms
+2 game2048 closure_set [heldout] animation frames: n 1482, mean 2.424 ms, median 2.244, p90 3.203, p99 8.950, max 13.144, total 3592 ms
+2 game2048 closure_set [heldout] busy: 6063 ms
+2 game2048 closure_set [heldout] last frame: 328 bytes, hash 6ab7a4511e770cbc
+2 game2048 storybook [heldout] game2048, mixed, storybook set 
+2 game2048 storybook [heldout] launch to first frame: 170 ms; played in 38.3 s; 3107 frames
+2 game2048 storybook [heldout] events → frame: n 1217, mean 1.820 ms, median 0.807, p90 4.058, p99 9.662, max 12.900, total 2215 ms
+2 game2048 storybook [heldout] release → frame: n 60, mean 43.701 ms, median 48.428, p90 59.711, p99 62.486, max 62.486, total 2622 ms
+2 game2048 storybook [heldout] animation frames: n 1513, mean 3.549 ms, median 2.622, p90 3.584, p99 32.513, max 41.253, total 5369 ms
+2 game2048 storybook [heldout] busy: 10206 ms
+2 game2048 storybook [heldout] last frame: 0 bytes, hash cbf29ce484222325
+2 game2048 game2048 [heldout] game2048, mixed, game2048 set 
+2 game2048 game2048 [heldout] launch to first frame: 164 ms; played in 38.3 s; 3133 frames
+2 game2048 game2048 [heldout] events → frame: n 1217, mean 1.903 ms, median 1.395, p90 3.624, p99 9.314, max 15.751, total 2315 ms
+2 game2048 game2048 [heldout] release → frame: n 60, mean 13.944 ms, median 14.482, p90 19.918, p99 23.762, max 23.762, total 837 ms
+2 game2048 game2048 [heldout] animation frames: n 1498, mean 2.666 ms, median 2.480, p90 3.268, p99 10.222, max 13.890, total 3994 ms
+2 game2048 game2048 [heldout] busy: 7146 ms
+2 game2048 game2048 [heldout] last frame: 328 bytes, hash 6ab7a4511e770cbc
+2 storybook corpus [heldout] storybook, mixed, corpus set 99 taps
+2 storybook corpus [heldout] launch to first frame: 188 ms; played in 25.8 s; 770 frames
+2 storybook corpus [heldout] events → frame: n 131, mean 16.588 ms, median 18.140, p90 27.242, p99 33.298, max 38.144, total 2173 ms
+2 storybook corpus [heldout] release → frame: n 4, mean 5.647 ms, median 5.556, p90 6.386, p99 6.386, max 6.386, total 23 ms
+2 storybook corpus [heldout] animation frames: n 563, mean 6.498 ms, median 6.247, p90 8.946, p99 11.611, max 18.848, total 3658 ms
+2 storybook corpus [heldout] busy: 5854 ms
+2 storybook corpus [heldout] last frame: 0 bytes, hash cbf29ce484222325
+2 storybook corpus_closure [heldout] storybook, mixed, corpus_closure set 99 taps
+2 storybook corpus_closure [heldout] launch to first frame: 147 ms; played in 25.8 s; 770 frames
+2 storybook corpus_closure [heldout] events → frame: n 131, mean 12.788 ms, median 15.005, p90 19.093, p99 25.776, max 31.979, total 1675 ms
+2 storybook corpus_closure [heldout] release → frame: n 4, mean 4.643 ms, median 4.741, p90 4.923, p99 4.923, max 4.923, total 19 ms
+2 storybook corpus_closure [heldout] animation frames: n 563, mean 4.833 ms, median 4.528, p90 7.229, p99 8.403, max 9.909, total 2721 ms
+2 storybook corpus_closure [heldout] busy: 4415 ms
+2 storybook corpus_closure [heldout] last frame: 0 bytes, hash cbf29ce484222325
+2 storybook closure_set [heldout] storybook, mixed, closure_set set 99 taps
+2 storybook closure_set [heldout] launch to first frame: 147 ms; played in 25.8 s; 770 frames
+2 storybook closure_set [heldout] events → frame: n 131, mean 10.872 ms, median 12.661, p90 17.558, p99 21.866, max 23.178, total 1424 ms
+2 storybook closure_set [heldout] release → frame: n 4, mean 3.892 ms, median 4.116, p90 4.166, p99 4.166, max 4.166, total 16 ms
+2 storybook closure_set [heldout] animation frames: n 563, mean 4.085 ms, median 3.877, p90 5.544, p99 7.307, max 8.276, total 2300 ms
+2 storybook closure_set [heldout] busy: 3740 ms
+2 storybook closure_set [heldout] last frame: 0 bytes, hash cbf29ce484222325
+2 storybook storybook [heldout] storybook, mixed, storybook set 99 taps
+2 storybook storybook [heldout] launch to first frame: 181 ms; played in 26.1 s; 770 frames
+2 storybook storybook [heldout] events → frame: n 131, mean 14.831 ms, median 13.816, p90 21.669, p99 136.157, max 180.254, total 1943 ms
+2 storybook storybook [heldout] release → frame: n 4, mean 4.842 ms, median 4.895, p90 5.320, p99 5.320, max 5.320, total 19 ms
+2 storybook storybook [heldout] animation frames: n 563, mean 5.125 ms, median 4.724, p90 6.877, p99 8.891, max 61.661, total 2885 ms
+2 storybook storybook [heldout] busy: 4847 ms
+2 storybook storybook [heldout] last frame: 0 bytes, hash cbf29ce484222325
+2 storybook game2048 [heldout] storybook, mixed, game2048 set 99 taps
+2 storybook game2048 [heldout] launch to first frame: 182 ms; played in 25.8 s; 770 frames
+2 storybook game2048 [heldout] events → frame: n 131, mean 13.386 ms, median 15.898, p90 21.026, p99 25.616, max 25.866, total 1754 ms
+2 storybook game2048 [heldout] release → frame: n 4, mean 4.490 ms, median 4.573, p90 4.676, p99 4.676, max 4.676, total 18 ms
+2 storybook game2048 [heldout] animation frames: n 563, mean 4.967 ms, median 4.621, p90 7.243, p99 8.866, max 11.924, total 2797 ms
+2 storybook game2048 [heldout] busy: 4568 ms
+2 storybook game2048 [heldout] last frame: 0 bytes, hash cbf29ce484222325
+3 game2048 corpus [heldout] game2048, mixed, corpus set 
+3 game2048 corpus [heldout] launch to first frame: 173 ms; played in 38.3 s; 3130 frames
+3 game2048 corpus [heldout] events → frame: n 1217, mean 1.629 ms, median 0.846, p90 3.522, p99 8.536, max 12.484, total 1982 ms
+3 game2048 corpus [heldout] release → frame: n 60, mean 13.699 ms, median 14.445, p90 18.120, p99 21.901, max 21.901, total 822 ms
+3 game2048 corpus [heldout] animation frames: n 1495, mean 2.609 ms, median 2.426, p90 3.286, p99 9.739, max 16.268, total 3901 ms
+3 game2048 corpus [heldout] busy: 6705 ms
+3 game2048 corpus [heldout] last frame: 328 bytes, hash 6ab7a4511e770cbc
+3 game2048 corpus_closure [heldout] game2048, mixed, corpus_closure set 
+3 game2048 corpus_closure [heldout] launch to first frame: 132 ms; played in 38.3 s; 3125 frames
+3 game2048 corpus_closure [heldout] events → frame: n 1217, mean 1.519 ms, median 0.732, p90 3.398, p99 8.254, max 12.859, total 1849 ms
+3 game2048 corpus_closure [heldout] release → frame: n 60, mean 12.568 ms, median 13.674, p90 17.839, p99 20.827, max 20.827, total 754 ms
+3 game2048 corpus_closure [heldout] animation frames: n 1490, mean 2.441 ms, median 2.252, p90 3.246, p99 9.533, max 12.744, total 3638 ms
+3 game2048 corpus_closure [heldout] busy: 6240 ms
+3 game2048 corpus_closure [heldout] last frame: 328 bytes, hash 6ab7a4511e770cbc
+3 game2048 closure_set [heldout] game2048, mixed, closure_set set 
+3 game2048 closure_set [heldout] launch to first frame: 128 ms; played in 38.3 s; 3120 frames
+3 game2048 closure_set [heldout] events → frame: n 1217, mean 1.498 ms, median 0.775, p90 3.463, p99 8.323, max 10.837, total 1824 ms
+3 game2048 closure_set [heldout] release → frame: n 60, mean 12.041 ms, median 13.065, p90 17.789, p99 19.412, max 19.412, total 722 ms
+3 game2048 closure_set [heldout] animation frames: n 1485, mean 2.454 ms, median 2.288, p90 3.230, p99 9.359, max 16.603, total 3644 ms
+3 game2048 closure_set [heldout] busy: 6190 ms
+3 game2048 closure_set [heldout] last frame: 328 bytes, hash 6ab7a4511e770cbc
+3 game2048 storybook [heldout] game2048, mixed, storybook set 
+3 game2048 storybook [heldout] launch to first frame: 172 ms; played in 38.3 s; 3105 frames
+3 game2048 storybook [heldout] events → frame: n 1217, mean 1.788 ms, median 0.810, p90 4.057, p99 9.277, max 15.114, total 2176 ms
+3 game2048 storybook [heldout] release → frame: n 60, mean 42.633 ms, median 48.573, p90 57.695, p99 63.231, max 63.231, total 2558 ms
+3 game2048 storybook [heldout] animation frames: n 1514, mean 3.525 ms, median 2.638, p90 3.488, p99 30.943, max 43.251, total 5337 ms
+3 game2048 storybook [heldout] busy: 10071 ms
+3 game2048 storybook [heldout] last frame: 0 bytes, hash cbf29ce484222325
+3 game2048 game2048 [heldout] game2048, mixed, game2048 set 
+3 game2048 game2048 [heldout] launch to first frame: 163 ms; played in 38.3 s; 3130 frames
+3 game2048 game2048 [heldout] events → frame: n 1217, mean 1.929 ms, median 1.471, p90 3.651, p99 9.122, max 13.266, total 2347 ms
+3 game2048 game2048 [heldout] release → frame: n 60, mean 13.373 ms, median 14.567, p90 18.736, p99 24.467, max 24.467, total 802 ms
+3 game2048 game2048 [heldout] animation frames: n 1496, mean 2.748 ms, median 2.548, p90 3.277, p99 10.426, max 13.763, total 4111 ms
+3 game2048 game2048 [heldout] busy: 7260 ms
+3 game2048 game2048 [heldout] last frame: 328 bytes, hash 6ab7a4511e770cbc
+3 storybook corpus [heldout] storybook, mixed, corpus set 99 taps
+3 storybook corpus [heldout] launch to first frame: 189 ms; played in 25.8 s; 770 frames
+3 storybook corpus [heldout] events → frame: n 131, mean 16.141 ms, median 18.371, p90 25.414, p99 34.722, max 35.428, total 2114 ms
+3 storybook corpus [heldout] release → frame: n 4, mean 5.717 ms, median 5.589, p90 6.383, p99 6.383, max 6.383, total 23 ms
+3 storybook corpus [heldout] animation frames: n 563, mean 6.466 ms, median 6.205, p90 9.040, p99 10.979, max 18.921, total 3641 ms
+3 storybook corpus [heldout] busy: 5778 ms
+3 storybook corpus [heldout] last frame: 0 bytes, hash cbf29ce484222325
+3 storybook corpus_closure [heldout] storybook, mixed, corpus_closure set 99 taps
+3 storybook corpus_closure [heldout] launch to first frame: 146 ms; played in 25.8 s; 770 frames
+3 storybook corpus_closure [heldout] events → frame: n 131, mean 13.049 ms, median 14.724, p90 19.712, p99 28.242, max 29.466, total 1709 ms
+3 storybook corpus_closure [heldout] release → frame: n 4, mean 4.470 ms, median 4.521, p90 4.766, p99 4.766, max 4.766, total 18 ms
+3 storybook corpus_closure [heldout] animation frames: n 563, mean 4.799 ms, median 4.532, p90 6.763, p99 8.431, max 10.746, total 2702 ms
+3 storybook corpus_closure [heldout] busy: 4429 ms
+3 storybook corpus_closure [heldout] last frame: 0 bytes, hash cbf29ce484222325
+3 storybook closure_set [heldout] storybook, mixed, closure_set set 99 taps
+3 storybook closure_set [heldout] launch to first frame: 148 ms; played in 25.8 s; 770 frames
+3 storybook closure_set [heldout] events → frame: n 131, mean 11.796 ms, median 13.839, p90 18.736, p99 24.715, max 26.696, total 1545 ms
+3 storybook closure_set [heldout] release → frame: n 4, mean 3.790 ms, median 3.826, p90 3.936, p99 3.936, max 3.936, total 15 ms
+3 storybook closure_set [heldout] animation frames: n 563, mean 4.169 ms, median 3.949, p90 5.882, p99 7.519, max 8.598, total 2347 ms
+3 storybook closure_set [heldout] busy: 3908 ms
+3 storybook closure_set [heldout] last frame: 0 bytes, hash cbf29ce484222325
+3 storybook storybook [heldout] storybook, mixed, storybook set 99 taps
+3 storybook storybook [heldout] launch to first frame: 183 ms; played in 26.1 s; 770 frames
+3 storybook storybook [heldout] events → frame: n 131, mean 15.525 ms, median 15.331, p90 21.300, p99 136.090, max 182.891, total 2034 ms
+3 storybook storybook [heldout] release → frame: n 4, mean 4.631 ms, median 4.667, p90 5.189, p99 5.189, max 5.189, total 19 ms
+3 storybook storybook [heldout] animation frames: n 563, mean 5.142 ms, median 4.694, p90 7.247, p99 9.128, max 59.281, total 2895 ms
+3 storybook storybook [heldout] busy: 4947 ms
+3 storybook storybook [heldout] last frame: 0 bytes, hash cbf29ce484222325
+3 storybook game2048 [heldout] storybook, mixed, game2048 set 99 taps
+3 storybook game2048 [heldout] launch to first frame: 182 ms; played in 25.8 s; 770 frames
+3 storybook game2048 [heldout] events → frame: n 131, mean 12.783 ms, median 14.407, p90 21.418, p99 27.873, max 30.259, total 1675 ms
+3 storybook game2048 [heldout] release → frame: n 4, mean 4.565 ms, median 4.675, p90 4.762, p99 4.762, max 4.762, total 18 ms
+3 storybook game2048 [heldout] animation frames: n 563, mean 4.998 ms, median 4.685, p90 6.819, p99 8.927, max 10.866, total 2814 ms
+3 storybook game2048 [heldout] busy: 4507 ms
+3 storybook game2048 [heldout] last frame: 0 bytes, hash cbf29ce484222325
+done
