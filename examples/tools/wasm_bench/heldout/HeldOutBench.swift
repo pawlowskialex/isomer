@@ -116,6 +116,9 @@ final class HeldOutBench: XCTestCase {
             let m = MixedWasmKitRuntime(native: native)
             try m.launch(wasm: try artifact("heldout_runtime.wasm"), hostImports: imports)
             try m.loadSideModule(wasm: side)
+            for extra in (environment["HELDOUT_ALSO"] ?? "").split(separator: ",") {
+                try m.loadSideModule(wasm: try artifact("\(extra)_side.wasm"))
+            }
             runtime = m
             mixed = m
         } else {
@@ -126,6 +129,11 @@ final class HeldOutBench: XCTestCase {
             }
             try wasmKit.launch(wasm: try artifact("heldout_runtime.wasm"), hostImports: imports)
             try wasmKit.loadSideModule(wasm: side)
+            // HELDOUT_ALSO: other features' side modules in the same instance
+            // (one memory, one table), loaded after this one.
+            for extra in (environment["HELDOUT_ALSO"] ?? "").split(separator: ",") {
+                try wasmKit.loadSideModule(wasm: try artifact("\(extra)_side.wasm"))
+            }
             runtime = wasmKit
         }
 
