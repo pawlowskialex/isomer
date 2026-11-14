@@ -121,8 +121,9 @@ cover run interpreted; no rule yet runs the profiling.
 ## Measurements
 
 The harnesses (profiling, the drag benchmark, 2048 Lab, simulator replays)
-aren't in this tree; they and their raw results are on the side-modules-perf
-branch of the pull request's head repository.
+aren't in this tree; they and each game's raw stats are on the
+side-modules-bench branch of the pull request's head repository
+(tools/mixed, tools/mixed/results).
 
 **The Storybook's 99 taps, WasmKit, Mac:** interpreted 3.15 s; mixed 0.44 s,
 byte-identical. Native code 3.9 MB for 4,990 functions.
